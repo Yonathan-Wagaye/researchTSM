@@ -1,0 +1,19 @@
+# dependencies for the backend
+
+# validation
+pydantic
+pydantic-settings
+
+# server
+fastapi
+uvicorn[standard]
+httpx
+
+# database
+asyncpg
+sqlalchemy
+alembic
+
+# test
+pytest
+
