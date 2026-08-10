@@ -1,42 +1,76 @@
 {
   "title": "Polyglot",
-  "description": "A research-oriented translation management system for multilingual phrases, media, and translation workflows.",
-  "detailDescription": "Polyglot is a full-stack Translation Management System built for academic research software. It helps researchers, translators, and developers manage multilingual phrases, language metadata, and media assets as structured, versioned records. The platform supports project-based language configuration, CSV/Excel import and export, per-language translation status tracking, review and publish workflows, and secure authentication with session-based refresh tokens. The stack pairs a Next.js frontend with a FastAPI backend and PostgreSQL, orchestrated with Docker Compose.",
-  "category": ["Web", "Databases"],
+  "description": "A research-oriented translation management system for managing multilingual content, translation workflows, and localized content delivery.",
+  "detailDescription": "Polyglot is an in-progress full-stack Translation Management System designed for academic and research software. It provides a centralized platform for researchers, translators, and developers to manage multilingual phrases, language metadata, translation context, and media assets as structured records instead of relying on spreadsheets. The system is being designed around asynchronous translation workflows, where translation jobs are queued and processed in batches using Redis while completed translations are persisted in PostgreSQL. Polyglot also introduces versioned publishing, allowing approved translations to be packaged as static JSON resources and distributed through a CDN for efficient use by research applications. The platform pairs a Next.js frontend with a FastAPI backend, PostgreSQL, Redis, and Docker.",
+  "category": [
+  "Web",
+  "Databases",
+  "System Design"
+  ],
   "techStack": [
-    "Next.js",
-    "React",
-    "TypeScript",
-    "Tailwind CSS",
-    "Material UI",
-    "FastAPI",
-    "SQLAlchemy",
-    "Alembic",
-    "PostgreSQL",
-    "Docker",
-    "JWT"
+  "Next.js",
+  "React",
+  "TypeScript",
+  "Tailwind CSS",
+  "Material UI",
+  "FastAPI",
+  "SQLAlchemy",
+  "Alembic",
+  "PostgreSQL",
+  "Redis",
+  "Docker",
+  "JWT"
   ],
   "liveUrl": "",
   "features": [
-    {
-      "title": "Multilingual Project Management",
-      "description": "Create and manage translation projects with a source language and multiple target languages."
-    },
-    {
-      "title": "Phrase & Key Workflows",
-      "description": "Add, search, edit, and archive translation keys while preserving stable developer keys per project."
-    },
-    {
-      "title": "Import & Export",
-      "description": "Import Excel and CSV translation files with preview and validation, then export approved phrases to Excel, CSV, or JSON."
-    },
-    {
-      "title": "Review & Status Tracking",
-      "description": "Track per-language translation status, mark outdated source changes, and filter phrases through a review and publish flow."
-    },
-    {
-      "title": "Secure Authentication",
-      "description": "User signup and login with JWT access tokens, HTTP-only refresh cookies, and protected dashboard routes."
-    }
+  {
+  "title": "Multilingual Project Management",
+  "description": "Create translation projects with a source language and multiple target languages, keeping phrases, translations, and language configuration organized per project."
+  },
+  {
+  "title": "Phrase & Translation Management",
+  "description": "Add, search, edit, rename, and archive phrases while maintaining stable developer-facing keys and viewing translations across all supported languages."
+  },
+  {
+  "title": "Context-Aware Translation",
+  "description": "Attach context, usage information, and parameterized placeholders to phrases so translators and machine translation services have the information needed to produce accurate translations."
+  },
+  {
+  "title": "Asynchronous Translation Workflow",
+  "description": "Queue translation jobs through Redis and process phrases asynchronously in batches, allowing large multilingual projects to be translated without blocking application requests."
+  },
+  {
+  "title": "Translation Status & Review",
+  "description": "Track translation states such as missing, draft, reviewed, and approved per language, detect translations made outdated by source changes, and support structured review workflows."
+  },
+  {
+  "title": "Versioned Publishing",
+  "description": "Publish approved translations as project versions so applications consume stable translation releases rather than unpublished database changes."
+  },
+  {
+  "title": "CDN Translation Delivery",
+  "description": "Package published translations into static language-specific JSON resources designed for CDN distribution, reducing repeated database queries and providing fast localized content delivery."
+  },
+  {
+  "title": "Import & Export",
+  "description": "Import existing Excel and CSV translation files with validation and preview workflows, and export project translations as Excel, CSV, or JSON."
+  },
+  {
+  "title": "Media Management",
+  "description": "Associate images, audio, and other localized media assets with phrases so research applications can manage textual and media localization through the same workflow."
+  },
+  {
+  "title": "Developer Integration",
+  "description": "Provide a developer-facing API and SDK workflow for retrieving published phrases and localized content directly from research applications and local experiments."
+  },
+  {
+  "title": "Secure Authentication",
+  "description": "Authenticate users with JWT access tokens and HTTP-only refresh cookies, with server-managed sessions and protected application routes."
+  },
+  {
+  "title": "Containerized Development",
+  "description": "Run the application stack through Docker with isolated frontend, backend, database, and supporting services for reproducible local development and deployment."
+  }
   ]
-}
+  }
+  
