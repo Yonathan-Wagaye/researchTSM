@@ -2,6 +2,7 @@
 
 # validation
 pydantic
+pydantic[email]
 pydantic-settings
 
 # server
@@ -9,11 +10,17 @@ fastapi
 uvicorn[standard]
 httpx
 
+# authentication
+pwdlib[argon2]
+PyJWT
+
 # database
 asyncpg
 sqlalchemy
+psycopg2-binary
 alembic
 
 # test
 pytest
+pytest-asyncio
 

@@ -20,9 +20,12 @@ services:
     
     volumes:
       - ./backend/app:/app/app
+      - ./backend/alembic:/app/alembic
+      - ./backend/alembic.ini:/app/alembic.ini
+      - ./backend/pytest.ini:/app/pytest.ini:ro
 
     env_file:
-      - .env
+      - ${ENV_FILE:-.env}
     
     depends_on:
       db:

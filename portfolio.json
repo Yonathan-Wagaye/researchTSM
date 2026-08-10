@@ -1,0 +1,42 @@
+{
+  "title": "Polyglot",
+  "description": "A research-oriented translation management system for multilingual phrases, media, and translation workflows.",
+  "detailDescription": "Polyglot is a full-stack Translation Management System built for academic research software. It helps researchers, translators, and developers manage multilingual phrases, language metadata, and media assets as structured, versioned records. The platform supports project-based language configuration, CSV/Excel import and export, per-language translation status tracking, review and publish workflows, and secure authentication with session-based refresh tokens. The stack pairs a Next.js frontend with a FastAPI backend and PostgreSQL, orchestrated with Docker Compose.",
+  "category": ["Web", "Databases"],
+  "techStack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "Tailwind CSS",
+    "Material UI",
+    "FastAPI",
+    "SQLAlchemy",
+    "Alembic",
+    "PostgreSQL",
+    "Docker",
+    "JWT"
+  ],
+  "liveUrl": "",
+  "features": [
+    {
+      "title": "Multilingual Project Management",
+      "description": "Create and manage translation projects with a source language and multiple target languages."
+    },
+    {
+      "title": "Phrase & Key Workflows",
+      "description": "Add, search, edit, and archive translation keys while preserving stable developer keys per project."
+    },
+    {
+      "title": "Import & Export",
+      "description": "Import Excel and CSV translation files with preview and validation, then export approved phrases to Excel, CSV, or JSON."
+    },
+    {
+      "title": "Review & Status Tracking",
+      "description": "Track per-language translation status, mark outdated source changes, and filter phrases through a review and publish flow."
+    },
+    {
+      "title": "Secure Authentication",
+      "description": "User signup and login with JWT access tokens, HTTP-only refresh cookies, and protected dashboard routes."
+    }
+  ]
+}

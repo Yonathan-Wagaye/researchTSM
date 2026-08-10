@@ -1,65 +1,109 @@
-import Image from "next/image";
+"use client";
+
+import { useRouter } from "next/navigation";
+import Button from "@mui/material/Button";
+
+import PolyglotLogo from "@/components/PolyglotLogo";
 
 export default function Home() {
+  const router = useRouter();
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="flex-1 flex flex-col">
+      <header className="flex items-center justify-between px-8 py-10">
+        <div className="flex items-center gap-4">
+          <PolyglotLogo size={72} />
+          <span className="text-5xl font-bold tracking-tight sm:text-6xl">
+            Polyglot
+          </span>
+        </div>
+        <Button
+          variant="outlined"
+          color="primary"
+          onClick={() => router.push("/login")}
+        >
+          Login
+        </Button>
+      </header>
+
+      <div className="flex-1 flex flex-col lg:flex-row lg:items-start gap-12 lg:gap-16 px-8 pt-4 pb-12 lg:pt-6 lg:pb-16">
+        <section className="lg:w-1/2 flex flex-col">
+          <h1 className="text-3xl lg:text-5xl font-bold tracking-tight leading-tight">
+            Localized Translation Management System Built For Research
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="mt-4 text-base lg:text-lg text-muted max-w-lg leading-relaxed">
+            Manage multilingual phrases, media, and translation workflows in one
+            place — for researchers, translators, and developers.
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Button
+              variant="contained"
+              size="large"
+              onClick={() => router.push("/signup")}
+            >
+              Get Started
+            </Button>
+          </div>
+
+          <div className="mt-12 flex divide-x divide-foreground/15">
+            <div className="pr-6">
+              <p className="text-2xl font-bold">CSV / Excel</p>
+              <p className="mt-1 text-sm text-muted">import &amp; export</p>
+            </div>
+            <div className="px-6">
+              <p className="text-2xl font-bold">Multi-lang</p>
+              <p className="mt-1 text-sm text-muted">project support</p>
+            </div>
+            <div className="pl-6">
+              <p className="text-2xl font-bold">Review</p>
+              <p className="mt-1 text-sm text-muted">&amp; publish flow</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="lg:w-1/2">
+          <h2 className="text-xl font-semibold mb-6">How it works</h2>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-start gap-4 rounded-xl bg-elevated p-4">
+              <div className="size-10 shrink-0 rounded-lg bg-cream/15 flex items-center justify-center text-cream font-bold">
+                1
+              </div>
+              <div>
+                <p className="font-semibold">Create a project</p>
+                <p className="mt-1 text-sm text-muted">
+                  Set a source language and add the languages you need to support
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4 rounded-xl bg-elevated p-4">
+              <div className="size-10 shrink-0 rounded-lg bg-cream/15 flex items-center justify-center text-cream font-bold">
+                2
+              </div>
+              <div>
+                <p className="font-semibold">Add phrases &amp; translations</p>
+                <p className="mt-1 text-sm text-muted">
+                  Organize keys, collaborate on translations, and track status
+                  per language
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4 rounded-xl bg-elevated p-4">
+              <div className="size-10 shrink-0 rounded-lg bg-cream/15 flex items-center justify-center text-cream font-bold">
+                3
+              </div>
+              <div>
+                <p className="font-semibold">Review and export</p>
+                <p className="mt-1 text-sm text-muted">
+                  Approve changes and export to CSV, Excel, or JSON when ready
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
   );
 }
