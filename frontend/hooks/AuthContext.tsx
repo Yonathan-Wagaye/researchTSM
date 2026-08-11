@@ -1,20 +1,40 @@
 "use client"
 import { createContext, useState, useContext, useEffect } from "react";
-import { AuthContextType, User, UserLogin, UserRegister } from "../types/authTypes";
+import {
+    AuthContextType,
+    SessionStatus,
+    User,
+    UserLogin,
+    UserRegister,
+} from "../types/authTypes";
 import {
     login as loginApi,
     logout as logoutApi,
     register as registerApi,
     refresh as refreshApi,
 } from "../api/auth";
+import { ApiError } from "../lib/api-client";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const EXPIRED_SESSION_CODES = new Set([
+    "expired_refresh_token",
+    "invalid_refresh_token",
+]);
+
+const sessionStatusFromError = (error: unknown): SessionStatus => {
+    if (error instanceof ApiError && EXPIRED_SESSION_CODES.has(error.code)) {
+        return "expired";
+    }
+
+    return "anonymous";
+};
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [accessToken, setAccessToken] = useState<string | null>(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [sessionStatus, setSessionStatus] = useState<SessionStatus>("loading");
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -24,9 +44,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 const response = await refreshApi();
                 setAccessToken(response.access_token);
                 setIsAuthenticated(true);
-            } catch {
+                setSessionStatus("authenticated");
+            } catch (error) {
                 setAccessToken(null);
                 setIsAuthenticated(false);
+                setSessionStatus(sessionStatusFromError(error));
             } finally {
                 setIsLoading(false);
             }
@@ -42,6 +64,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const response = await loginApi(credentials);
             setAccessToken(response.access_token);
             setIsAuthenticated(true);
+            setSessionStatus("authenticated");
         } catch (error) {
             setError(error instanceof Error ? error.message : "An unknown error occurred");
             throw error;
@@ -73,6 +96,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setUser(null);
             setAccessToken(null);
             setIsAuthenticated(false);
+            setSessionStatus("anonymous");
             setError(null);
         }
     };
@@ -80,7 +104,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const clearError = () => setError(null);
 
     return (
-        <AuthContext.Provider value={{ user, accessToken, isAuthenticated, isLoading, error, login, register, logout, clearError }}>
+        <AuthContext.Provider value={{
+            user,
+            accessToken,
+            isAuthenticated,
+            sessionStatus,
+            isLoading,
+            error,
+            login,
+            register,
+            logout,
+            clearError,
+        }}>
             {children}
         </AuthContext.Provider>
     )

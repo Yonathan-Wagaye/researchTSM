@@ -1,9 +1,15 @@
+from __future__ import annotations
+
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
+
+if TYPE_CHECKING:
+    from app.models.project import Project
 
 
 class User(Base):
@@ -24,8 +30,11 @@ class User(Base):
         server_default=func.now(),
     )
 
-    auth_sessions: Mapped[list["AuthSession"]] = relationship(
+    auth_sessions: Mapped[list[AuthSession]] = relationship(
         "AuthSession", back_populates="user", cascade="all, delete-orphan"
+    )
+    projects: Mapped[list[Project]] = relationship(
+        "Project", back_populates="owner", cascade="all, delete-orphan"
     )
 
 
@@ -37,14 +46,16 @@ class AuthSession(Base):
     refresh_token_hash: Mapped[str] = mapped_column(
         String(255), nullable=False, unique=True
     )
-    user_agent: Mapped[str] = mapped_column(String(255), nullable=True)
-    ip_address: Mapped[str] = mapped_column(String(45), nullable=True)
+    user_agent: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    ip_address: Mapped[str | None] = mapped_column(String(45), nullable=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    revoked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    revoked_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=datetime.now, server_default=func.now()
     )
     last_used_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=datetime.now, server_default=func.now()
     )
-    user: Mapped["User"] = relationship("User", back_populates="auth_sessions")
+    user: Mapped[User] = relationship("User", back_populates="auth_sessions")

@@ -1,12 +1,41 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@mui/material/Button";
 
+import Loading from "@/components/Loading";
 import PolyglotLogo from "@/components/PolyglotLogo";
+import { useAuth } from "@/hooks/AuthContext";
 
 export default function Home() {
   const router = useRouter();
+  const { sessionStatus, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (isLoading || sessionStatus === "loading") return;
+
+    if (sessionStatus === "authenticated") {
+      router.replace("/dashboard");
+      return;
+    }
+
+    if (sessionStatus === "expired") {
+      router.replace("/login");
+    }
+  }, [isLoading, sessionStatus, router]);
+
+  if (isLoading || sessionStatus === "loading" || sessionStatus === "authenticated" || sessionStatus === "expired") {
+    return (
+      <Loading
+        message={
+          sessionStatus === "expired"
+            ? "Your session expired. Redirecting to login..."
+            : "Checking your session..."
+        }
+      />
+    );
+  }
 
   return (
     <main className="flex-1 flex flex-col">

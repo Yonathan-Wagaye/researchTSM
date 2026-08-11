@@ -22,10 +22,13 @@ interface AuthResponse {
     token_type: string;
 }
 
+type SessionStatus = "loading" | "authenticated" | "expired" | "anonymous";
+
 type AuthContextType = {
     user: User | null;
     accessToken: string | null;
     isAuthenticated: boolean;
+    sessionStatus: SessionStatus;
     isLoading: boolean;
     error: string | null;
     login: (credentials: UserLogin) => Promise<void>;
@@ -34,4 +37,11 @@ type AuthContextType = {
     clearError: () => void;
 }
 
-export type { UserLogin, UserRegister, AuthContextType, AuthResponse, User};
+export type {
+    UserLogin,
+    UserRegister,
+    AuthContextType,
+    AuthResponse,
+    User,
+    SessionStatus,
+};
