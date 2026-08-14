@@ -17,7 +17,7 @@ from app.exceptions.auth_exceptions import (
     MissingRefreshTokenException,
 )
 from app.models.user import AuthSession, User
-from app.schemas.User import UserLogin, UserRegister, UserResponse
+from app.schemas.user_schema import UserLogin, UserRegister, UserResponse
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession

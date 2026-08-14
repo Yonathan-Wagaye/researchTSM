@@ -15,6 +15,18 @@ class InvalidCredentialsException(TSMException):
     message: str = "Invalid email or password"
 
 
+class InvalidAccessTokenException(TSMException):
+    status_code: int = 401
+    error_code: str = "invalid_access_token"
+    message: str = "Invalid access token"
+
+
+class ExpiredAccessTokenException(TSMException):
+    status_code: int = 401
+    error_code: str = "expired_access_token"
+    message: str = "Access token has expired"
+
+
 # Exception for when a refresh token has expired
 class ExpiredRefreshTokenException(TSMException):
     status_code: int = 401

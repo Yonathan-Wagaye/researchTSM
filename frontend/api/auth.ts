@@ -31,3 +31,12 @@ export const logout = async () => {
         method: "POST",
     });
 }
+
+export const getMe = async (accessToken: string) => {
+    return await apiClient<User>("/auth/me", {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+    });
+}

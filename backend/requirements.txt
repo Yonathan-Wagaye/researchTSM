@@ -9,6 +9,7 @@ pydantic-settings
 fastapi
 uvicorn[standard]
 httpx
+python-multipart
 
 # authentication
 pwdlib[argon2]
@@ -24,3 +25,6 @@ alembic
 pytest
 pytest-asyncio
 
+
+# excel
+openpyxl

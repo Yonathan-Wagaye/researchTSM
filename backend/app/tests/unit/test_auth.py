@@ -33,3 +33,20 @@ async def test_login_user(client: AsyncClient, created_user_id: int) -> None:
     assert body["token_type"] == "Bearer"
     assert "refresh_token" not in body
     assert "refresh_token" in response.cookies
+
+
+async def test_get_me(
+    client: AsyncClient, authenticated_client: dict[str, str]
+) -> None:
+    response = await client.get(
+        "/auth/me",
+        headers={"Authorization": f"Bearer {authenticated_client['access_token']}"},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert "id" in body
+    assert body["email"] == USER_REGISTER_DATA["email"]
+    assert body["first_name"] == USER_REGISTER_DATA["first_name"]
+    assert body["last_name"] == USER_REGISTER_DATA["last_name"]
+    assert "created_at" in body
+    assert "updated_at" in body

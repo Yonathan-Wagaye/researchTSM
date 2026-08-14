@@ -1,18 +1,17 @@
 "use client";
 
-import AppShell from "@/components/AppShell";
 import Loading from "@/components/Loading";
 import { useAuth } from "@/hooks/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
+const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isAuthenticated && !isLoading) {
-      router.replace("/login");
+    if (isAuthenticated && !isLoading) {
+      router.replace("/dashboard");
     }
   }, [isAuthenticated, isLoading, router]);
 
@@ -20,11 +19,11 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
     return <Loading message="Checking your session..." />;
   }
 
-  if (!isAuthenticated) {
+  if (isAuthenticated) {
     return null;
   }
 
-  return <AppShell>{children}</AppShell>;
+  return <>{children}</>;
 };
 
-export default ProtectedLayout;
+export default AuthLayout;

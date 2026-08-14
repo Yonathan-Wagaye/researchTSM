@@ -1,0 +1,9 @@
+code,name,native_name,direction
+en,English,English,ltr
+fr,French,Français,ltr
+es,Spanish,Español,ltr
+de,German,Deutsch,ltr
+ar,Arabic,العربية,rtl
+am,Amharic,አማርኛ,ltr
+pt,Portuguese,Português,ltr
+zh-CN,Chinese Simplified,简体中文,ltr

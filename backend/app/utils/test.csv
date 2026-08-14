@@ -1,0 +1,55 @@
+key,en,fr,de,es,it,pt
+HELLO,Hello,Bonjour,Hallo,Hola,Ciao,Olá
+GOODBYE,Goodbye,Au revoir,Auf Wiedersehen,Adiós,Arrivederci,Adeus
+WELCOME,Welcome,Bienvenue,Willkommen,Bienvenido,Benvenuto,Bem-vindo
+THANK_YOU,Thank you,Merci,Danke,Gracias,Grazie,Obrigado
+PLEASE,Please,S'il vous plaît,Bitte,Por favor,Per favore,Por favor
+YES,Yes,Oui,Ja,Sí,Sì,Sim
+NO,No,Non,Nein,No,No,Não
+GOOD_MORNING,Good morning,Bonjour,Guten Morgen,Buenos días,Buongiorno,Bom dia
+GOOD_AFTERNOON,Good afternoon,Bon après-midi,Guten Tag,Buenas tardes,Buon pomeriggio,Boa tarde
+GOOD_EVENING,Good evening,Bonsoir,Guten Abend,Buenas tardes,Buonasera,Boa noite
+GOOD_NIGHT,Good night,Bonne nuit,Gute Nacht,Buenas noches,Buona notte,Boa noite
+HOW_ARE_YOU,How are you?,Comment allez-vous ?,Wie geht es Ihnen?,¿Cómo está?,Come sta?,Como está?
+I_AM_FINE,I am fine,Je vais bien,Mir geht es gut,Estoy bien,Sto bene,Estou bem
+WHAT_IS_YOUR_NAME,What is your name?,Comment vous appelez-vous ?,Wie heißen Sie?,¿Cómo se llama?,Come si chiama?,Qual é o seu nome?
+MY_NAME_IS,My name is,Je m'appelle,Ich heiße,Me llamo,Mi chiamo,Meu nome é
+NICE_TO_MEET_YOU,Nice to meet you,Enchanté,Freut mich Sie kennenzulernen,Mucho gusto,Piacere di conoscerla,Prazer em conhecê-lo
+SEE_YOU_LATER,See you later,À plus tard,Bis später,Hasta luego,A più tardi,Até mais tarde
+SEE_YOU_TOMORROW,See you tomorrow,À demain,Bis morgen,Hasta mañana,A domani,Até amanhã
+EXCUSE_ME,Excuse me,Excusez-moi,Entschuldigung,Disculpe,Mi scusi,Com licença
+SORRY,Sorry,Désolé,Es tut mir leid,Lo siento,Mi dispiace,Desculpe
+HELP,Help,Aide,Hilfe,Ayuda,Aiuto,Ajuda
+I_NEED_HELP,I need help,J'ai besoin d'aide,Ich brauche Hilfe,Necesito ayuda,Ho bisogno di aiuto,Preciso de ajuda
+WHERE_IS_THE_BATHROOM,Where is the bathroom?,Où sont les toilettes ?,Wo ist die Toilette?,¿Dónde está el baño?,Dov'è il bagno?,Onde fica o banheiro?
+HOW_MUCH_IS_THIS,How much is this?,Combien ça coûte ?,Wie viel kostet das?,¿Cuánto cuesta esto?,Quanto costa questo?,Quanto custa isto?
+I_DONT_UNDERSTAND,I don't understand,Je ne comprends pas,Ich verstehe nicht,No entiendo,Non capisco,Não entendo
+PLEASE_REPEAT,Please repeat,Répétez s'il vous plaît,Bitte wiederholen Sie,Repita por favor,Ripeta per favore,Repita por favor
+SPEAK_SLOWLY,Please speak slowly,Parlez lentement s'il vous plaît,Bitte sprechen Sie langsam,Hable despacio por favor,Parli lentamente per favore,Fale devagar por favor
+WHERE_ARE_YOU_FROM,Where are you from?,D'où venez-vous ?,Woher kommen Sie?,¿De dónde es?,Di dove è?,De onde você é?
+I_AM_FROM,I am from,Je viens de,Ich komme aus,Soy de,Vengo da,Eu sou de
+WHAT_TIME_IS_IT,What time is it?,Quelle heure est-il ?,Wie spät ist es?,¿Qué hora es?,Che ore sono?,Que horas são?
+TODAY,Today,Aujourd'hui,Heute,Hoy,Oggi,Hoje
+TOMORROW,Tomorrow,Demain,Morgen,Mañana,Domani,Amanhã
+YESTERDAY,Yesterday,Hier,Gestern,Ayer,Ieri,Ontem
+START,Start,Commencer,Starten,Comenzar,Inizia,Começar
+STOP,Stop,Arrêter,Stoppen,Detener,Fermare,Parar
+CONTINUE,Continue,Continuer,Fortfahren,Continuar,Continua,Continuar
+CANCEL,Cancel,Annuler,Abbrechen,Cancelar,Annulla,Cancelar
+SAVE,Save,Enregistrer,Speichern,Guardar,Salva,Salvar
+DELETE,Delete,Supprimer,Löschen,Eliminar,Elimina,Excluir
+EDIT,Edit,Modifier,Bearbeiten,Editar,Modifica,Editar
+SEARCH,Search,Rechercher,Suchen,Buscar,Cerca,Pesquisar
+LOADING,Loading,Chargement,Wird geladen,Cargando,Caricamento,Carregando
+SUCCESS,Success,Succès,Erfolg,Éxito,Successo,Sucesso
+ERROR,Error,Erreur,Fehler,Error,Errore,Erro
+TRY_AGAIN,Try again,Réessayer,Erneut versuchen,Intentar de nuevo,Riprova,Tentar novamente
+LOGIN,Log in,Se connecter,Anmelden,Iniciar sesión,Accedi,Entrar
+LOGOUT,Log out,Se déconnecter,Abmelden,Cerrar sesión,Esci,Sair
+CREATE_ACCOUNT,Create account,Créer un compte,Konto erstellen,Crear cuenta,Crea account,Criar conta
+EMAIL,Email,E-mail,E-Mail,Correo electrónico,Email,E-mail
+PASSWORD,Password,Mot de passe,Passwort,Contraseña,Password,Senha
+SUBMIT,Submit,Soumettre,Absenden,Enviar,Invia,Enviar
+NEXT,Next,Suivant,Weiter,Siguiente,Avanti,Próximo
+PREVIOUS,Previous,Précédent,Zurück,Anterior,Precedente,Anterior
+FINISH,Finish,Terminer,Fertigstellen,Finalizar,Termina,Finalizar

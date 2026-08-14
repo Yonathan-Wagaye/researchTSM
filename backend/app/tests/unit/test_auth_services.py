@@ -1,5 +1,7 @@
-from app.schemas.User import UserLogin
+from app.core.deps import get_current_user
+from app.schemas.user_schema import UserLogin
 from app.services.auth_services import authenticate_user, create_auth_session
+from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -34,3 +36,20 @@ async def test_authenticate_user(
     )
     assert response["access_token"] is not None
     assert response["refresh_token"] is not None
+
+
+async def test_get_current_user(
+    db_session: AsyncSession,
+    authenticated_client: dict[str, str],
+) -> None:
+    credentials = HTTPAuthorizationCredentials(
+        scheme="Bearer",
+        credentials=authenticated_client["access_token"],
+    )
+    user = await get_current_user(
+        credentials=credentials,
+        db=db_session,
+    )
+    assert user.email == "test@example.com"
+    assert user.first_name == "Test"
+    assert user.last_name == "User"

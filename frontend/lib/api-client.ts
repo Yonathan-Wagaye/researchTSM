@@ -65,14 +65,17 @@ const apiClient = async <T>(
   }
 
   let response: Response;
+  const isFormData = options.body instanceof FormData;
+  const headers = new Headers(options.headers);
+
+  if (!isFormData && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
 
   try {
     response = await fetch(`${baseUrl}${path}`, {
       ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...options.headers,
-      },
+      headers,
       credentials: "include",
     });
   } catch {

@@ -12,6 +12,7 @@ import {
     logout as logoutApi,
     register as registerApi,
     refresh as refreshApi,
+    getMe as getMeApi,
 } from "../api/auth";
 import { ApiError } from "../lib/api-client";
 
@@ -43,9 +44,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             try {
                 const response = await refreshApi();
                 setAccessToken(response.access_token);
+                const me = await getMeApi(response.access_token);
+                setUser(me);
                 setIsAuthenticated(true);
                 setSessionStatus("authenticated");
             } catch (error) {
+                setUser(null);
                 setAccessToken(null);
                 setIsAuthenticated(false);
                 setSessionStatus(sessionStatusFromError(error));
@@ -63,6 +67,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setError(null);
             const response = await loginApi(credentials);
             setAccessToken(response.access_token);
+            const me = await getMeApi(response.access_token);
+            setUser(me);
             setIsAuthenticated(true);
             setSessionStatus("authenticated");
         } catch (error) {
