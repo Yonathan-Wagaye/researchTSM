@@ -24,3 +24,8 @@ Develop a translation management platform tailored for research software that ma
 - Attach shared media assets to phrases with preview support
 - Record basic revision history and restore previous translation values
 - Support user authentication with administrator and regular-user roles
+
+## License
+
+This project is licensed under the [MIT License](LICENSE). Copyright (c) 2026 Yonathan Wagaye.
+
