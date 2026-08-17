@@ -37,3 +37,12 @@ async def delete_cache(
 ) -> None:
     client = redis_client or await get_redis_client()
     await client.delete(key)
+
+
+async def delete_cache_by_prefix(
+    prefix: str,
+    redis_client: aioredis.Redis | None = None,
+) -> None:
+    client = redis_client or await get_redis_client()
+    async for key in client.scan_iter(match=f"{prefix}*"):
+        await client.delete(key)

@@ -1,6 +1,7 @@
 import logging
 from math import ceil
 
+from app.core.caching import delete_cache_by_prefix, get_cache, set_cache
 from app.exceptions.phrase_exceptions import (
     PhraseAccessDeniedException,
     PhraseAlreadyExistsException,
@@ -19,11 +20,11 @@ from app.schemas.phrase_schema import (
     PhraseCreateRequest,
     PhraseCreateResponse,
     PhraseGetResponse,
+    PhrasesResponse,
     PhraseTranslationCell,
     PhraseTranslationResponse,
     PhraseUpdateRequest,
     PhraseUpdateResponse,
-    PhrasesResponse,
 )
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
@@ -31,6 +32,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 logger = logging.getLogger(__name__)
+
+PHRASE_LIST_CACHE_TTL_SECONDS = 60 * 60 * 24
+
+
+def _phrase_list_cache_key(project_id: int, offset: int, limit: int) -> str:
+    return f"phrases:{project_id}:{offset}:{limit}"
+
+
+async def invalidate_phrase_list_cache(project_id: int) -> None:
+    await delete_cache_by_prefix(f"phrases:{project_id}:")
 
 
 async def _get_owned_project(
@@ -183,6 +194,7 @@ async def add_phrase(
         new_phrase.project_id,
         owner_id,
     )
+    await invalidate_phrase_list_cache(new_phrase.project_id)
     return _to_create_response(new_phrase)
 
 
@@ -240,6 +252,7 @@ async def update_phrase_details(
         phrase_id,
         owner_id,
     )
+    await invalidate_phrase_list_cache(phrase.project_id)
     return _to_update_response(phrase)
 
 
@@ -259,6 +272,17 @@ async def get_paginated_phrase_translations(
     )
     project = await _get_owned_project(project_id, owner_id, db)
     default_language_code = project.default_language.code.upper()
+    cache_key = _phrase_list_cache_key(project_id, offset, limit)
+
+    cached_result = await get_cache(cache_key)
+    if cached_result:
+        logger.info(
+            "Phrase translations cache hit: project_id=%s offset=%s limit=%s",
+            project_id,
+            offset,
+            limit,
+        )
+        return PhrasesResponse.model_validate_json(cached_result)
 
     try:
         total_count = await db.scalar(
@@ -301,7 +325,7 @@ async def get_paginated_phrase_translations(
         len(phrases),
         total_count,
     )
-    return PhrasesResponse(
+    response = PhrasesResponse(
         phrases=[
             _to_translation_response(phrase, default_language_code)
             for phrase in phrases
@@ -313,3 +337,9 @@ async def get_paginated_phrase_translations(
         has_next=offset + limit < total_count,
         has_previous=offset > 0,
     )
+    await set_cache(
+        cache_key,
+        response.model_dump_json(),
+        ex=PHRASE_LIST_CACHE_TTL_SECONDS,
+    )
+    return response

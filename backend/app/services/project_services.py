@@ -27,6 +27,7 @@ from app.schemas.project_schema import (
     ProjectResponse,
     ProjectUpdateRequest,
 )
+from app.services.phrase_services import invalidate_phrase_list_cache
 from app.utils.parsePhraseFiles import (
     analyze_phrase_rows,
     extract_language_codes,
@@ -417,6 +418,7 @@ async def confirm_phrase_upload(
         raise
 
     await delete_cache(_phrase_upload_cache_key(project_id))
+    await invalidate_phrase_list_cache(project_id)
     logger.info(
         "Phrase upload confirmed: project_id=%s owner_id=%s phrases=%s translations=%s",
         project_id,
