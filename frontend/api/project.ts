@@ -1,12 +1,25 @@
 import { Project, CreateProject, UpdateProject } from '@/types/projectTypes';
+import {
+    PhraseUploadConfirmResult,
+    PhraseUploadSummary,
+} from '@/types/phraseTypes';
 import apiClient from '@/lib/api-client';
 
-export const getPaginatedProjects = async (limit: number, offset: number) => {
+export const getPaginatedProjects = async (
+    limit: number,
+    offset: number,
+    accessToken: string,
+) => {
     const queryParams = new URLSearchParams({
         limit: limit.toString(),
         offset: offset.toString(),
     });
-    return await apiClient<Project[]>(`/projects/getProjects?${queryParams}`, {method: 'GET'});
+    return await apiClient<Project[]>(`/projects/getProjects?${queryParams}`, {
+        method: 'GET',
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+    });
 }
 
 
@@ -48,15 +61,30 @@ export const uploadPhrases = async (
     const formData = new FormData();
     formData.append("phrase_file", file);
 
-    return await apiClient<{
-        phrase_count: number;
-        languages: string[];
-        unsupported_languages: string[];
-    }>(
+    return await apiClient<PhraseUploadSummary>(
         `/projects/uploadPhrases?${queryParams}`,
         {
             method: "POST",
             body: formData,
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        },
+    );
+};
+
+export const confirmPhraseUpload = async (
+    projectId: number,
+    accessToken: string,
+) => {
+    const queryParams = new URLSearchParams({
+        project_id: projectId.toString(),
+    });
+
+    return await apiClient<PhraseUploadConfirmResult>(
+        `/projects/confirmPhraseUpload?${queryParams}`,
+        {
+            method: "POST",
             headers: {
                 Authorization: `Bearer ${accessToken}`,
             },

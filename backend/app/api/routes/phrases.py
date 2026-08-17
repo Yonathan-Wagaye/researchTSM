@@ -5,12 +5,13 @@ from app.schemas.phrase_schema import (
     PhraseCreateRequest,
     PhraseCreateResponse,
     PhraseGetResponse,
+    PhrasesResponse,
     PhraseUpdateRequest,
     PhraseUpdateResponse,
 )
 from app.services.phrase_services import (
     add_phrase,
-    get_paginated_phrases,
+    get_paginated_phrase_translations,
     get_single_phrase,
     update_phrase_details,
 )
@@ -52,14 +53,14 @@ async def get_phrase(
     return await get_single_phrase(phrase_id, current_user.id, db)
 
 
-@router.get("/getPhrases", response_model=list[PhraseGetResponse])
-async def get_phrases(
+@router.get("/getPhraseTranslations", response_model=PhrasesResponse)
+async def get_phrases_translations(
     project_id: int,
-    limit: int = Query(default=10, ge=1, le=100),
+    limit: int = Query(default=50, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    return await get_paginated_phrases(
+    return await get_paginated_phrase_translations(
         project_id, limit, offset, current_user.id, db
     )

@@ -1,16 +1,26 @@
+import json
 import logging
 
+from app.core.caching import delete_cache, get_cache, set_cache
+from app.exceptions.phrase_exceptions import (
+    InvalidPhraseFileException,
+    PhraseUploadNotFoundException,
+)
 from app.exceptions.project_exceptions import (
     ProjectAccessDeniedException,
     ProjectNotFoundException,
     ProjectPaginationErrorException,
     ProjectUpdateErrorException,
 )
-from app.exceptions.phrase_exceptions import (
-    InvalidPhraseFileException,
-)
+from app.models.language import Language
+from app.models.phrase import Phrase
 from app.models.project import Project
-from app.schemas.phrase_schema import PhraseUploadResponse
+from app.models.translation import Translation
+from app.schemas.phrase_schema import (
+    PhraseUploadConfirmResponse,
+    PhraseUploadPreviewRow,
+    PhraseUploadResponse,
+)
 from app.schemas.project_schema import (
     ProjectCreateRequest,
     ProjectCreateResponse,
@@ -18,6 +28,10 @@ from app.schemas.project_schema import (
     ProjectUpdateRequest,
 )
 from app.utils.parsePhraseFiles import (
+    analyze_phrase_rows,
+    extract_language_codes,
+    get_row_key,
+    get_row_translation,
     keep_supported_columns,
     parse_phrase_file,
 )
@@ -28,6 +42,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 logger = logging.getLogger(__name__)
+
+PHRASE_UPLOAD_CACHE_TTL_SECONDS = 60 * 60 * 24
+PHRASE_UPLOAD_PREVIEW_LIMIT = 5
+
+
+def _phrase_upload_cache_key(project_id: int) -> str:
+    return f"project_{project_id}_phrases"
 
 
 async def _load_project_with_language(
@@ -248,19 +269,165 @@ async def upload_phrases_to_project(
             "The file has no languages supported by the platform"
         )
 
+    preview_rows, duplicate_keys, empty_key_count, translation_counts = (
+        analyze_phrase_rows(
+            rows,
+            language_codes,
+            preview_limit=PHRASE_UPLOAD_PREVIEW_LIMIT,
+        )
+    )
+
+    upload_keys = {get_row_key(row) for row in rows if get_row_key(row)}
+    existing_keys: list[str] = []
+    if upload_keys:
+        existing_result = await db.execute(
+            select(Phrase.key).where(
+                Phrase.project_id == project_id,
+                Phrase.key.in_(upload_keys),
+            )
+        )
+        existing_keys = sorted(existing_result.scalars().all())
+
     logger.info(
-        "Phrase file accepted: project_id=%s owner_id=%s languages=%s ignored=%s phrases=%s",
+        "Phrase file accepted: project_id=%s owner_id=%s languages=%s ignored=%s phrases=%s duplicates=%s existing=%s empty_keys=%s",
         project_id,
         owner_id,
         language_codes,
         unsupported,
         len(rows),
+        duplicate_keys,
+        existing_keys,
+        empty_key_count,
+    )
+    await set_cache(
+        _phrase_upload_cache_key(project_id),
+        json.dumps(rows),
+        ex=PHRASE_UPLOAD_CACHE_TTL_SECONDS,
     )
     return PhraseUploadResponse(
         phrase_count=len(rows),
         languages=language_codes,
         unsupported_languages=unsupported,
+        filename=filename,
+        preview=[PhraseUploadPreviewRow.model_validate(row) for row in preview_rows],
+        duplicate_keys=duplicate_keys,
+        empty_key_count=empty_key_count,
+        existing_keys=existing_keys,
+        translation_counts=translation_counts,
+        cache_expires_in_seconds=PHRASE_UPLOAD_CACHE_TTL_SECONDS,
     )
 
 
+async def confirm_phrase_upload(
+    project_id: int,
+    owner_id: int,
+    db: AsyncSession,
+) -> PhraseUploadConfirmResponse:
+    await get_single_project(project_id, owner_id, db)
+    project = await _load_project_with_language(project_id, db)
 
+    cached_rows = await get_cache(_phrase_upload_cache_key(project_id))
+    if not cached_rows:
+        raise PhraseUploadNotFoundException()
+
+    rows = json.loads(cached_rows)
+    if not rows:
+        raise PhraseUploadNotFoundException()
+
+    language_codes = extract_language_codes(list(rows[0].keys()))
+    default_language_code = project.default_language.code.upper()
+
+    existing_result = await db.execute(
+        select(Phrase.key).where(Phrase.project_id == project_id)
+    )
+    existing_keys = set(existing_result.scalars().all())
+
+    languages_result = await db.execute(select(Language))
+    language_by_code = {
+        language.code.upper(): language for language in languages_result.scalars().all()
+    }
+
+    seen_keys: set[str] = set()
+    skipped_empty_keys = 0
+    skipped_duplicate_keys = 0
+    skipped_existing_keys = 0
+    phrases_created = 0
+    translations_created = 0
+
+    for row in rows:
+        key = get_row_key(row)
+        if not key:
+            skipped_empty_keys += 1
+            continue
+        if key in seen_keys:
+            skipped_duplicate_keys += 1
+            continue
+        if key in existing_keys:
+            skipped_existing_keys += 1
+            continue
+
+        source_text = get_row_translation(row, default_language_code)
+        if not source_text:
+            for code in language_codes:
+                source_text = get_row_translation(row, code)
+                if source_text:
+                    break
+        if not source_text:
+            skipped_empty_keys += 1
+            continue
+
+        seen_keys.add(key)
+        phrase = Phrase(
+            project_id=project_id,
+            key=key,
+            source_text=source_text,
+        )
+        db.add(phrase)
+        await db.flush()
+
+        for code in language_codes:
+            if code == default_language_code:
+                continue
+            text = get_row_translation(row, code)
+            if not text:
+                continue
+            language = language_by_code.get(code)
+            if language is None:
+                continue
+            db.add(
+                Translation(
+                    phrase_id=phrase.id,
+                    target_language_id=language.id,
+                    text=text,
+                )
+            )
+            translations_created += 1
+
+        phrases_created += 1
+
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        logger.exception(
+            "Phrase upload confirmation failed: project_id=%s owner_id=%s",
+            project_id,
+            owner_id,
+        )
+        raise
+
+    await delete_cache(_phrase_upload_cache_key(project_id))
+    logger.info(
+        "Phrase upload confirmed: project_id=%s owner_id=%s phrases=%s translations=%s",
+        project_id,
+        owner_id,
+        phrases_created,
+        translations_created,
+    )
+    return PhraseUploadConfirmResponse(
+        phrases_created=phrases_created,
+        translations_created=translations_created,
+        skipped_empty_keys=skipped_empty_keys,
+        skipped_duplicate_keys=skipped_duplicate_keys,
+        skipped_existing_keys=skipped_existing_keys,
+    )

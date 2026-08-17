@@ -60,6 +60,59 @@ def unsupported_language_codes(
     return sorted({code for code in language_codes if code not in supported})
 
 
+def get_row_key(row: dict) -> str:
+    for header, value in row.items():
+        if header.strip().upper() == KEY_HEADER:
+            return (value or "").strip()
+    return ""
+
+
+def get_row_translation(row: dict, language_code: str) -> str:
+    normalized_code = language_code.strip().upper()
+    for header, value in row.items():
+        if header.strip().upper() == normalized_code:
+            return (value or "").strip()
+    return ""
+
+
+def analyze_phrase_rows(
+    rows: list[dict],
+    language_codes: list[str],
+    preview_limit: int = 5,
+) -> tuple[list[dict], list[str], int, dict[str, int]]:
+    key_counts: dict[str, int] = {}
+    duplicate_keys: set[str] = set()
+    empty_key_count = 0
+    translation_counts = dict.fromkeys(language_codes, 0)
+    preview: list[dict] = []
+
+    for row in rows:
+        key = get_row_key(row)
+        if not key:
+            empty_key_count += 1
+            continue
+
+        key_counts[key] = key_counts.get(key, 0) + 1
+        if key_counts[key] > 1:
+            duplicate_keys.add(key)
+
+        for code in language_codes:
+            if get_row_translation(row, code):
+                translation_counts[code] += 1
+
+    for row in rows[:preview_limit]:
+        preview.append(
+            {
+                "key": get_row_key(row),
+                "translations": {
+                    code: get_row_translation(row, code) for code in language_codes
+                },
+            }
+        )
+
+    return preview, sorted(duplicate_keys), empty_key_count, translation_counts
+
+
 def keep_supported_columns(
     rows: list[dict],
     supported_codes: set[str],
@@ -72,11 +125,7 @@ def keep_supported_columns(
     unsupported_set = set(unsupported)
     allowed = {KEY_HEADER} | {code.upper() for code in supported_codes}
     filtered_rows = [
-        {
-            key: value
-            for key, value in row.items()
-            if key.strip().upper() in allowed
-        }
+        {key: value for key, value in row.items() if key.strip().upper() in allowed}
         for row in rows
     ]
     kept = [code for code in language_codes if code not in unsupported_set]

@@ -2,22 +2,31 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
 
-import { getProject, uploadPhrases } from "@/api/project";
+import { getLanguages } from "@/api/language";
+import { getPhraseTranslations } from "@/api/phrase";
+import {
+  confirmPhraseUpload,
+  getProject,
+  uploadPhrases,
+} from "@/api/project";
 import Loading from "@/components/Loading";
+import PhraseTranslationsTable, {
+  SAMPLE_LANGUAGE_COLUMNS,
+  SAMPLE_PHRASES,
+} from "@/components/PhraseTranslationsTable";
+import PhraseUploadSummaryDialog from "@/components/PhraseUploadSummaryDialog";
 import { ApiError } from "@/lib/api-client";
 import { useAuth } from "@/hooks/AuthContext";
+import { PhraseUploadSummary, PhrasesResponse } from "@/types/phraseTypes";
 import { Project } from "@/types/projectTypes";
+import { Language } from "@/types/langaugeTypes";
 
 const ACCEPTED_PHRASE_FILES = ".csv,.xlsx,.xls";
+const PHRASE_PAGE_SIZE = 25;
 
 const formatDate = (value: string) =>
   new Date(value).toLocaleDateString(undefined, {
@@ -36,9 +45,46 @@ const ProjectPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [unsupportedLanguagesMessage, setUnsupportedLanguagesMessage] =
-    useState<string | null>(null);
+  const [uploadSummary, setUploadSummary] = useState<PhraseUploadSummary | null>(
+    null,
+  );
+  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [confirmError, setConfirmError] = useState<string | null>(null);
   const [uploadNotice, setUploadNotice] = useState<string | null>(null);
+  const [phrases, setPhrases] = useState<PhrasesResponse | null>(null);
+  const [phrasesError, setPhrasesError] = useState<string | null>(null);
+  const [isLoadingPhrases, setIsLoadingPhrases] = useState(false);
+  const [phraseOffset, setPhraseOffset] = useState(0);
+  const [languages, setLanguages] = useState<Language[]>([]);
+
+  const loadPhrases = useCallback(
+    async (offset: number) => {
+      if (!accessToken || Number.isNaN(projectId)) return;
+
+      setIsLoadingPhrases(true);
+      setPhrasesError(null);
+      try {
+        const result = await getPhraseTranslations(
+          projectId,
+          accessToken,
+          PHRASE_PAGE_SIZE,
+          offset,
+        );
+        setPhrases(result);
+        setPhraseOffset(offset);
+      } catch (loadError) {
+        setPhrasesError(
+          loadError instanceof ApiError
+            ? loadError.message
+            : "Unable to load phrases.",
+        );
+      } finally {
+        setIsLoadingPhrases(false);
+      }
+    },
+    [accessToken, projectId],
+  );
 
   useEffect(() => {
     if (!accessToken || Number.isNaN(projectId)) return;
@@ -57,7 +103,11 @@ const ProjectPage = () => {
     };
 
     void fetchProject();
-  }, [projectId, accessToken]);
+    void loadPhrases(0);
+    void getLanguages(accessToken)
+      .then(setLanguages)
+      .catch(() => setLanguages([]));
+  }, [projectId, accessToken, loadPhrases]);
 
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -68,19 +118,13 @@ const ProjectPage = () => {
 
     setSelectedFile(file);
     setUploadNotice(null);
-    setUnsupportedLanguagesMessage(null);
+    setConfirmError(null);
     setIsUploading(true);
 
     try {
       const result = await uploadPhrases(projectId, file, accessToken);
-      setUploadNotice(
-        `Accepted ${result.phrase_count} phrases in ${result.languages.join(", ")}.`,
-      );
-      if (result.unsupported_languages.length > 0) {
-        setUnsupportedLanguagesMessage(
-          `These languages are not supported and were ignored: ${result.unsupported_languages.join(", ")}.`,
-        );
-      }
+      setUploadSummary(result);
+      setIsSummaryOpen(true);
     } catch (uploadError) {
       setUploadNotice(
         uploadError instanceof ApiError
@@ -89,6 +133,39 @@ const ProjectPage = () => {
       );
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleCancelUpload = () => {
+    setIsSummaryOpen(false);
+    setUploadSummary(null);
+    setConfirmError(null);
+    setSelectedFile(null);
+  };
+
+  const handleConfirmUpload = async () => {
+    if (!accessToken) return;
+
+    setIsConfirming(true);
+    setConfirmError(null);
+
+    try {
+      const result = await confirmPhraseUpload(projectId, accessToken);
+      setIsSummaryOpen(false);
+      setUploadSummary(null);
+      setSelectedFile(null);
+      setUploadNotice(
+        `Imported ${result.phrases_created} phrase${result.phrases_created === 1 ? "" : "s"} with ${result.translations_created} translation${result.translations_created === 1 ? "" : "s"}.`,
+      );
+      await loadPhrases(0);
+    } catch (confirmUploadError) {
+      setConfirmError(
+        confirmUploadError instanceof ApiError
+          ? confirmUploadError.message
+          : "Unable to finish the phrase upload.",
+      );
+    } finally {
+      setIsConfirming(false);
     }
   };
 
@@ -105,6 +182,22 @@ const ProjectPage = () => {
   }
 
   const language = project.default_language;
+  const defaultLanguageCode = language.code.toUpperCase();
+  const languageColumns = Array.from(
+    new Set([
+      defaultLanguageCode,
+      ...(phrases?.phrases.flatMap((phrase) =>
+        Object.keys(phrase.translations),
+      ) ?? []),
+    ]),
+  );
+  const languageNames = Object.fromEntries(
+    languages.map((item) => [item.code.toUpperCase(), item.name]),
+  );
+  const formatLanguageHeader = (code: string) => {
+    const name = languageNames[code.toUpperCase()];
+    return name ? `${code.toUpperCase()} (${name})` : code.toUpperCase();
+  };
 
   return (
     <div className="space-y-8">
@@ -189,78 +282,74 @@ const ProjectPage = () => {
           </div>
         </div>
 
-        <div className="px-5 py-8">
-          <Alert severity="info" variant="outlined" className="mb-6">
-            The first column header is{" "}
-            <span className="font-medium">KEY</span> — the name of each phrase.
-            The remaining headers are language codes (
-            <span className="font-medium">EN</span>,{" "}
-            <span className="font-medium">AR</span>,{" "}
-            <span className="font-medium">FA</span>
-            ). Each row is one phrase: its name, then the text in each language.
-            Polyglot fills in English name, native name, and text direction —
-            you do not need those metadata rows.
-          </Alert>
+        {phrases && phrases.total_count === 0 && (
+          <div className="px-5 py-8">
+            <Alert severity="info" variant="outlined" className="mb-6">
+              The first column header is{" "}
+              <span className="font-medium">KEY</span> — the name of each phrase.
+              The remaining headers are language codes (
+              <span className="font-medium">EN</span>,{" "}
+              <span className="font-medium">AR</span>,{" "}
+              <span className="font-medium">FA</span>
+              ). Each row is one phrase: its name, then the text in each language.
+              Polyglot fills in English name, native name, and text direction —
+              you do not need those metadata rows.
+            </Alert>
 
-          <div className="mt-6 overflow-x-auto rounded-lg border border-foreground/10">
-            <table className="min-w-full text-left text-sm">
-              <caption className="sr-only">Example phrase file layout</caption>
-              <thead className="bg-foreground/5 text-xs uppercase tracking-wide text-foreground/55">
-                <tr>
-                  <th className="px-4 py-3 font-medium">KEY</th>
-                  <th className="px-4 py-3 font-medium">EN</th>
-                  <th className="px-4 py-3 font-medium">AR</th>
-                  <th className="px-4 py-3 font-medium">FA</th>
-                </tr>
-              </thead>
-              <tbody className="text-foreground/80">
-                <tr className="border-t border-foreground/10">
-                  <td className="px-4 py-3">GREETING</td>
-                  <td className="px-4 py-3">Hello</td>
-                  <td className="px-4 py-3">مرحبا</td>
-                  <td className="px-4 py-3">سلام</td>
-                </tr>
-                <tr className="border-t border-foreground/10">
-                  <td className="px-4 py-3">THANKS</td>
-                  <td className="px-4 py-3">Thank you</td>
-                  <td className="px-4 py-3">شكرا</td>
-                  <td className="px-4 py-3">متشکرم</td>
-                </tr>
-              </tbody>
-            </table>
+            <div className="mt-6">
+              <PhraseTranslationsTable
+                phrases={SAMPLE_PHRASES}
+                languageColumns={SAMPLE_LANGUAGE_COLUMNS}
+                formatLanguageHeader={formatLanguageHeader}
+                showStatusFilter={false}
+              />
+            </div>
+            <p className="mt-3 text-xs text-foreground/40">
+              Accepted files: CSV or Excel (.csv, .xlsx, .xls). First column is
+              the phrase KEY; every other column is a language code with phrases
+              in the rows below.
+            </p>
           </div>
-          <p className="mt-3 text-xs text-foreground/40">
-            Accepted files: CSV or Excel (.csv, .xlsx, .xls). First column is
-            the phrase KEY; every other column is a language code with phrases
-            in the rows below.
-          </p>
-        </div>
+        )}
 
-        <div className="border-t border-foreground/10 px-5 py-10 text-center">
-          <h3 className="font-semibold">No phrases</h3>
-          <p className="mt-2 text-sm text-foreground/50">
-            This project does not have any phrases yet. Upload a file to add
-            them.
-          </p>
+        <div className="border-t border-foreground/10 px-5 py-8">
+          {isLoadingPhrases && !phrases ? (
+            <Loading message="Loading phrases..." />
+          ) : phrasesError ? (
+            <Alert severity="error" variant="outlined">
+              {phrasesError}
+            </Alert>
+          ) : !phrases || phrases.total_count === 0 ? (
+            <div className="py-6 text-center">
+              <h3 className="font-semibold">No phrases</h3>
+              <p className="mt-2 text-sm text-foreground/50">
+                This project does not have any phrases yet. Upload a file to add
+                them.
+              </p>
+            </div>
+          ) : (
+            <PhraseTranslationsTable
+              phrases={phrases}
+              languageColumns={languageColumns}
+              formatLanguageHeader={formatLanguageHeader}
+              isLoading={isLoadingPhrases}
+              pageSize={PHRASE_PAGE_SIZE}
+              offset={phraseOffset}
+              onPageChange={(nextOffset) => void loadPhrases(nextOffset)}
+            />
+          )}
         </div>
       </section>
 
-      <Dialog
-        open={Boolean(unsupportedLanguagesMessage)}
-        onClose={() => setUnsupportedLanguagesMessage(null)}
-      >
-        <DialogTitle>Some languages were ignored</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {unsupportedLanguagesMessage}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setUnsupportedLanguagesMessage(null)}>
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <PhraseUploadSummaryDialog
+        open={isSummaryOpen}
+        summary={uploadSummary}
+        languageNames={languageNames}
+        isConfirming={isConfirming}
+        confirmError={confirmError}
+        onCancel={handleCancelUpload}
+        onConfirm={handleConfirmUpload}
+      />
     </div>
   );
 };

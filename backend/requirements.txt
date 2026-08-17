@@ -20,6 +20,7 @@ asyncpg
 sqlalchemy
 psycopg2-binary
 alembic
+redis
 
 # test
 pytest

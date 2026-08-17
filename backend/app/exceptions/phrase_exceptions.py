@@ -35,3 +35,9 @@ class InvalidPhraseFileException(TSMException):
     status_code: int = 400
     error_code: str = "invalid_phrase_file"
     message: str = "The phrase file could not be read"
+
+
+class PhraseUploadNotFoundException(TSMException):
+    status_code: int = 404
+    error_code: str = "phrase_upload_not_found"
+    message: str = "No pending phrase upload was found for this project"

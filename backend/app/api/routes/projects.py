@@ -1,7 +1,7 @@
 from app.core.deps import get_current_user, get_supported_language_codes
 from app.database import get_db
 from app.models.user import User
-from app.schemas.phrase_schema import PhraseUploadResponse
+from app.schemas.phrase_schema import PhraseUploadConfirmResponse, PhraseUploadResponse
 from app.schemas.project_schema import (
     ProjectCreateRequest,
     ProjectCreateResponse,
@@ -10,6 +10,7 @@ from app.schemas.project_schema import (
 )
 from app.services.project_services import (
     add_project,
+    confirm_phrase_upload,
     get_paginated_projects,
     get_single_project,
     update_project_details,
@@ -80,3 +81,12 @@ async def upload_phrases(
         supported_language_codes,
         db,
     )
+
+
+@router.post("/confirmPhraseUpload", response_model=PhraseUploadConfirmResponse)
+async def confirm_phrase_upload_route(
+    project_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    return await confirm_phrase_upload(project_id, current_user.id, db)

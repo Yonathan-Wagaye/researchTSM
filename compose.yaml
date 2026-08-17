@@ -31,7 +31,6 @@ services:
       db:
         condition: service_healthy
 
-  
   db:
     image: postgres:17
 
