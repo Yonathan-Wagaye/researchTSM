@@ -4,8 +4,8 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@mui/material/Button";
 
-import Loading from "@/components/Loading";
-import PolyglotLogo from "@/components/PolyglotLogo";
+import Loading from "@/components/ui/Loading";
+import PolyglotLogo from "@/components/layout/PolyglotLogo";
 import { useAuth } from "@/hooks/AuthContext";
 
 export default function Home() {
@@ -16,7 +16,7 @@ export default function Home() {
     if (isLoading || sessionStatus === "loading") return;
 
     if (sessionStatus === "authenticated") {
-      router.replace("/dashboard");
+      router.replace("/project");
       return;
     }
 

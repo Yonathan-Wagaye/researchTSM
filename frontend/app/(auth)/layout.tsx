@@ -1,6 +1,6 @@
 "use client";
 
-import Loading from "@/components/Loading";
+import Loading from "@/components/ui/Loading";
 import { useAuth } from "@/hooks/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -11,7 +11,7 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
-      router.replace("/dashboard");
+      router.replace("/project");
     }
   }, [isAuthenticated, isLoading, router]);
 

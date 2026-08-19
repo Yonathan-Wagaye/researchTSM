@@ -27,11 +27,12 @@ router = APIRouter()
     status_code=status.HTTP_201_CREATED,
 )
 async def create_phrase(
+    project_id: int,
     phrase: PhraseCreateRequest,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    return await add_phrase(phrase, current_user.id, db)
+    return await add_phrase(phrase, current_user.id, project_id, db)
 
 
 @router.put("/updatePhrase", response_model=PhraseUpdateResponse)

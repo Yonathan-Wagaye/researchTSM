@@ -45,3 +45,14 @@ export interface PhrasesResponse {
   has_next: boolean;
   has_previous: boolean;
 }
+
+export interface PhraseCreateResponse {
+  id: number;
+  project_id: number;
+  key: string;
+  source_text: string;
+  context: string | null;
+  usage: string | null;
+  created_at: string;
+  updated_at: string;
+}

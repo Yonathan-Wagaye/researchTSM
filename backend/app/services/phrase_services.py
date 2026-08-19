@@ -156,18 +156,19 @@ def _to_translation_response(
 async def add_phrase(
     phrase: PhraseCreateRequest,
     owner_id: int,
+    project_id: int,
     db: AsyncSession,
 ) -> PhraseCreateResponse:
     logger.info(
         "Creating phrase: owner_id=%s project_id=%s key=%s",
         owner_id,
-        phrase.project_id,
+        project_id,
         phrase.key,
     )
-    await _get_owned_project(phrase.project_id, owner_id, db)
+    await _get_owned_project(project_id, owner_id, db)
 
     new_phrase = Phrase(
-        project_id=phrase.project_id,
+        project_id=project_id,
         key=phrase.key,
         source_text=phrase.source_text,
         context=phrase.context,
@@ -183,7 +184,7 @@ async def add_phrase(
         logger.warning(
             "Phrase creation failed (duplicate key): owner_id=%s project_id=%s key=%s",
             owner_id,
-            phrase.project_id,
+            project_id,
             phrase.key,
         )
         raise PhraseAlreadyExistsException()

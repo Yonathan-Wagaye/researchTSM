@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     COOKIE_DOMAIN: str | None = None
     FRONTEND_URL: str | None = "http://localhost:3000"
-    REDIS_HOST: str = "redis"
+    REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
 
     @property

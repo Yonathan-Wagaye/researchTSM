@@ -7,8 +7,8 @@ import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 
-import PasswordInput from "@/components/PasswordInput";
-import PolyglotLogo from "@/components/PolyglotLogo";
+import PasswordInput from "@/components/auth/PasswordInput";
+import PolyglotLogo from "@/components/layout/PolyglotLogo";
 import { useAuth } from "@/hooks/AuthContext";
 
 const SignupPage = () => {

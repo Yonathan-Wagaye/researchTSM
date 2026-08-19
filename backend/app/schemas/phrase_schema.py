@@ -1,12 +1,10 @@
 from datetime import datetime
 
-from pydantic import BaseModel
-
 from app.models.enums import TranslationStatus
+from pydantic import BaseModel
 
 
 class PhraseCreateRequest(BaseModel):
-    project_id: int
     key: str
     source_text: str
     context: str | None = None

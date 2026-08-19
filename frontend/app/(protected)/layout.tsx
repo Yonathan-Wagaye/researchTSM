@@ -1,11 +1,12 @@
 "use client";
 
-import AppShell from "@/components/AppShell";
-import Loading from "@/components/Loading";
+import Loading from "@/components/ui/Loading";
 import { useAuth } from "@/hooks/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
+// Bare auth guard — no shell here. AppShell is applied by the (shell) group
+// layout; board pages use BoardShell via their own [projectId] layout.
 const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
@@ -24,7 +25,7 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
     return null;
   }
 
-  return <AppShell>{children}</AppShell>;
+  return <>{children}</>;
 };
 
 export default ProtectedLayout;

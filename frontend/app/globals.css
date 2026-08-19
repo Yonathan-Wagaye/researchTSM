@@ -1,29 +1,35 @@
 @import "tailwindcss";
 
 @theme {
-  /* Graphite blacks */
-  --color-background: #111111;
-  --color-surface: #1a1a1a;
-  --color-elevated: #242424;
-
-  /* Creams and whites */
-  --color-foreground: #fafafa;
-  --color-cream: #e8e2d6;
-  --color-muted: #b8b3aa;
-  --color-accent: #ffffff;
-  --color-accent-foreground: #111111;
-
-  /* Soft warm alert tone that fits the palette */
+  /* Default (Graphite dark) — overridden at runtime by ThemeContext */
+  --color-background: var(--background, #111111);
+  --color-surface: var(--surface, #1a1a1a);
+  --color-elevated: var(--elevated, #242424);
+  --color-foreground: var(--foreground, #fafafa);
+  --color-cream: var(--cream, #e8e2d6);
+  --color-muted: var(--muted, #b8b3aa);
+  --color-accent: var(--accent, #ffffff);
+  --color-accent-foreground: var(--accent-foreground, #111111);
   --color-danger: #c9b8a6;
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
+/* Default vars — overridden by ThemeContext on <html> */
+:root {
+  --background: #111111;
+  --surface: #161616;
+  --elevated: #1a1a1a;
+  --foreground: #fafafa;
+  --muted: #b8b3aa;
+  --accent: #ffffff;
+  --accent-foreground: #111111;
+  --cream: #c9b8a6;
+}
+
 body {
-  background-color: var(--color-background);
-  background-image:
-    radial-gradient(ellipse 90% 55% at 50% -10%, #2a2a2a 0%, transparent 55%),
-    linear-gradient(180deg, #161616 0%, #111111 45%, #0d0d0d 100%);
-  color: var(--color-foreground);
+  background-color: var(--background);
+  color: var(--foreground);
+  transition: background-color 300ms ease, color 200ms ease;
 }
