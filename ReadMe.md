@@ -27,5 +27,9 @@ Develop a translation management platform tailored for research software that ma
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE). Copyright (c) 2026 Yonathan Wagaye.
+This project is licensed under the [Elastic License 2.0 (ELv2)](LICENSE).
+
+You are free to use, copy, modify, and distribute this software for any non-commercial purpose. You may **not** offer it as a hosted or managed service to third parties. See the [LICENSE](LICENSE) file for full terms.
+
+Copyright © 2026 Yonathan Wagaye.
 
